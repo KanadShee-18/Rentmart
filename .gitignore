@@ -4,7 +4,6 @@ rentmart-server/logs
 rentmart-server/*.env
 rentmart-server/store
 rentmart-server//generated/prisma
-rentmart-server/
 rentmart-server/src/generated/prisma
 
 

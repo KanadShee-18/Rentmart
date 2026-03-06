@@ -48,18 +48,18 @@ export const Navbar = () => {
                       <Link href='/list-product'>List Equipment</Link>
                     </Button>
                   )}
-                  <Link
+                  {/* <Link
                     href='/profile'
                     className='text-sm text-muted-foreground hidden sm:block hover:text-foreground transition-colors'
                   >
                     {user?.name}
-                  </Link>
+                  </Link> */}
                   <Button
                     variant='outline'
-                    size='sm'
+                    size='icon-sm'
                     className='hidden sm:flex'
                   >
-                    <Link href='/profile'>Profile</Link>
+                    <Link href='/profile'>{user?.name[0]}</Link>
                   </Button>
                   <Button
                     variant={"outline"}

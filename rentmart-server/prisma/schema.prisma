@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  RENTER @map("renter")
+  OWNER  @map("owner")
+  ADMIN  @map("admin")
+}
+
+enum ReviewType {
+  RENTER_REVIEW    @map("renter_review")
+  OWNER_REVIEW     @map("owner_review")
+  EQUIPMENT_REVIEW @map("equipment_review")
+}
+
+enum EquipmentStatus {
+  PENDING  @map("pending")
+  VERIFIED @map("verified")
+  REJECTED @map("rejected")
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique @db.VarChar(255)
+  password         String    @map("password_hash")
+  name             String    @map("full_name") @db.VarChar(100)
+  phoneNumber      String?   @map("phone") @db.VarChar(20)
+  avatarUrl        String?   @map("avatar_url")
+  role             Role      @default(RENTER)
+  isVerified       Boolean   @default(false) @map("is_verified")
+  idVerifiedAt     DateTime? @map("id_verified_at") @db.Timestamptz
+  stripeCustomerId String?   @map("stripe_customer_id") @db.VarChar(100)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  addresses       Address[]
+  reviewsWritten  Review[]       @relation("Reviewer")
+  reviewsReceived Review[]       @relation("Reviewee")
+  notifications   Notification[]
+  equipments      Equipment[]
+
+  @@map("users")
+}
+
+model Address {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  user       User     @relation(fields: [userId], references: [id])
+  label      String?  @db.VarChar(50)
+  street     String   @db.VarChar(200)
+  city       String   @db.VarChar(100)
+  state      String?  @db.VarChar(50)
+  postalCode String?  @map("postal_code") @db.VarChar(20)
+  country    String   @db.Char(2)
+  lat        Decimal? @db.Decimal(10, 7)
+  lng        Decimal? @db.Decimal(10, 7)
+  isDefault  Boolean  @default(false) @map("is_default")
+
+  @@map("addresses")
+}
+
+model Review {
+  id         String     @id @default(uuid()) @db.Uuid
+  rentalId   String     @map("rental_id") @db.Uuid
+  // Relation to Rental model to be added later
+  // rental     Rental     @relation(fields: [rentalId], references: [id])
+  reviewerId String     @map("reviewer_id") @db.Uuid
+  reviewer   User       @relation("Reviewer", fields: [reviewerId], references: [id])
+  revieweeId String?    @map("reviewee_id") @db.Uuid
+  reviewee   User?      @relation("Reviewee", fields: [revieweeId], references: [id])
+  type       ReviewType
+  rating     Int        @db.SmallInt
+  comment    String?
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("reviews")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  type      String?   @db.VarChar(50)
+  title     String?   @db.VarChar(200)
+  body      String?
+  refType   String?   @map("ref_type") @db.VarChar(50)
+  refId     String?   @map("ref_id") @db.Uuid
+  readAt    DateTime? @map("read_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("notifications")
+}
+
+model Category {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String      @unique @db.VarChar(100)
+  slug        String      @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  equipments  Equipment[]
+
+  @@map("categories")
+}
+
+model Equipment {
+  id          String          @id @default(uuid()) @db.Uuid
+  ownerId     String          @map("owner_id") @db.Uuid
+  owner       User            @relation(fields: [ownerId], references: [id])
+  categoryId  String          @map("category_id") @db.Uuid
+  category    Category        @relation(fields: [categoryId], references: [id])
+  name        String          @db.VarChar(200)
+  description String?
+  pricePerDay Decimal         @map("price_per_day") @db.Decimal(10, 2)
+  location    String?         @db.VarChar(200)
+  status      EquipmentStatus @default(PENDING)
+  images      String[]
+  publicIds   String[]        @map("public_ids")
+  adminNote   String?         @map("admin_note")
+  verifiedAt  DateTime?       @map("verified_at") @db.Timestamptz
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("equipments")
+}
