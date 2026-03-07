@@ -7,6 +7,7 @@ import {
   type Equipment,
 } from "@/lib/api/equipment";
 
+export const EQUIPMENT_BY_ID_KEY = (id: string) => ["equipment", "detail", id];
 export const VERIFIED_EQUIPMENT_KEY = (categoryId?: string) =>
   categoryId
     ? ["equipment", "verified", categoryId]
@@ -14,6 +15,14 @@ export const VERIFIED_EQUIPMENT_KEY = (categoryId?: string) =>
 
 export const MY_LISTINGS_KEY = ["equipment", "my"] as const;
 export const PENDING_EQUIPMENT_KEY = ["equipment", "admin", "pending"] as const;
+
+export function useEquipmentById(id: string) {
+  return useQuery({
+    queryKey: EQUIPMENT_BY_ID_KEY(id),
+    queryFn: () => equipmentApi.getById(id),
+    enabled: Boolean(id),
+  });
+}
 
 export function useVerifiedEquipment(categoryId?: string) {
   return useQuery({

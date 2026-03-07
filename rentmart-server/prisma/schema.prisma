@@ -35,17 +35,31 @@ model User {
   role             Role      @default(RENTER)
   isVerified       Boolean   @default(false) @map("is_verified")
   idVerifiedAt     DateTime? @map("id_verified_at") @db.Timestamptz
+  emailVerified    Boolean   @default(false) @map("email_verified")
   stripeCustomerId String?   @map("stripe_customer_id") @db.VarChar(100)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  addresses       Address[]
-  reviewsWritten  Review[]       @relation("Reviewer")
-  reviewsReceived Review[]       @relation("Reviewee")
-  notifications   Notification[]
-  equipments      Equipment[]
+  addresses        Address[]
+  reviewsWritten   Review[]          @relation("Reviewer")
+  reviewsReceived  Review[]          @relation("Reviewee")
+  notifications    Notification[]
+  equipments       Equipment[]
+  otpVerifications OtpVerification[]
 
   @@map("users")
+}
+
+model OtpVerification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash   String   @map("otp_hash")
+  purpose   String   @db.VarChar(50)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("otp_verifications")
 }
 
 model Address {

@@ -1,53 +1,54 @@
-import express, { type Router } from 'express'
+import express, { type Router } from "express";
 import equipmentController, {
   uploadMiddleware,
-} from '../controller/equipmentController.js'
-import { authenticate, requireRole } from '../middleware/auth.js'
+} from "../controller/equipmentController.js";
+import { authenticate, requireRole } from "../middleware/auth.js";
 
-const router: Router = express.Router()
+const router: Router = express.Router();
 
 // Public
-router.get('/', equipmentController.listVerified)
+router.get("/", equipmentController.listVerified);
+router.get("/:id", equipmentController.getById);
 
 // Owner
 router.post(
-  '/',
+  "/",
   authenticate,
-  requireRole('OWNER'),
+  requireRole("OWNER"),
   uploadMiddleware,
-  equipmentController.create
-)
+  equipmentController.create,
+);
 router.get(
-  '/my',
+  "/my",
   authenticate,
-  requireRole('OWNER'),
-  equipmentController.myListings
-)
+  requireRole("OWNER"),
+  equipmentController.myListings,
+);
 
 // Admin
 router.get(
-  '/admin/pending',
+  "/admin/pending",
   authenticate,
-  requireRole('ADMIN'),
-  equipmentController.adminPending
-)
+  requireRole("ADMIN"),
+  equipmentController.adminPending,
+);
 router.patch(
-  '/admin/:id/verify',
+  "/admin/:id/verify",
   authenticate,
-  requireRole('ADMIN'),
-  equipmentController.adminVerify
-)
+  requireRole("ADMIN"),
+  equipmentController.adminVerify,
+);
 router.patch(
-  '/admin/:id/reject',
+  "/admin/:id/reject",
   authenticate,
-  requireRole('ADMIN'),
-  equipmentController.adminReject
-)
+  requireRole("ADMIN"),
+  equipmentController.adminReject,
+);
 router.delete(
-  '/admin/:id',
+  "/admin/:id",
   authenticate,
-  requireRole('ADMIN'),
-  equipmentController.adminDelete
-)
+  requireRole("ADMIN"),
+  equipmentController.adminDelete,
+);
 
-export default router
+export default router;

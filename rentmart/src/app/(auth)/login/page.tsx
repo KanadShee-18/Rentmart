@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useLogin } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,17 +12,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { mutate: login, isPending, error } = useLogin();
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login({ email, password });
   };
 
-  const errorMessage =
-    error && "response" in (error as object)
-      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ((error as any).response?.data?.message ?? error.message)
-      : error?.message;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const axiosError =
+    error && "response" in (error as object) ? (error as any) : null;
+  const errorMessage = axiosError
+    ? (axiosError.response?.data?.message ?? error?.message)
+    : error?.message;
+  const isEmailUnverified = axiosError?.response?.status === 403;
 
   return (
     <div className='w-full max-w-md space-y-6'>
@@ -60,7 +64,21 @@ export default function LoginPage() {
         </div>
 
         {errorMessage && (
-          <p className='text-destructive text-sm'>{errorMessage}</p>
+          <div className='space-y-2'>
+            <p className='text-destructive text-sm'>{errorMessage}</p>
+            {isEmailUnverified && (
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full'
+                onClick={() =>
+                  router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
+                }
+              >
+                Verify your email
+              </Button>
+            )}
+          </div>
         )}
 
         <Button type='submit' className='w-full' disabled={isPending}>

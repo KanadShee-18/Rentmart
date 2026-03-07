@@ -4,9 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
   authApi,
-  type LoginPayload,
-  type SignupPayload,
   type ChangePasswordPayload,
+  type LoginPayload,
+  type ResendOtpPayload,
+  type SignupPayload,
+  type VerifyOtpPayload,
 } from "@/lib/api/auth";
 
 export const AUTH_QUERY_KEY = ["auth", "me"] as const;
@@ -37,13 +39,14 @@ export function useAuth() {
   };
 }
 
-/** Sign up a new user, then redirect to login */
+/** Sign up a new user, then redirect to OTP verification */
 export function useSignup() {
   const router = useRouter();
   return useMutation({
     mutationFn: (payload: SignupPayload) => authApi.signup(payload),
-    onSuccess: () => {
-      router.push("/login");
+    onSuccess: (data, variables) => {
+      const email = data.data?.email ?? variables.email;
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
     },
   });
 }
@@ -79,5 +82,23 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: (payload: ChangePasswordPayload) =>
       authApi.changePassword(payload),
+  });
+}
+
+/** Verify email with OTP code */
+export function useVerifyOtp() {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: (payload: VerifyOtpPayload) => authApi.verifyOtp(payload),
+    onSuccess: () => {
+      router.push("/login");
+    },
+  });
+}
+
+/** Resend OTP to email */
+export function useResendOtp() {
+  return useMutation({
+    mutationFn: (payload: ResendOtpPayload) => authApi.resendOtp(payload),
   });
 }

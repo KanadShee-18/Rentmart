@@ -28,6 +28,12 @@ export interface CreateEquipmentPayload {
 }
 
 export const equipmentApi = {
+  /** Public: get single verified equipment by id */
+  getById: async (id: string): Promise<Equipment> => {
+    const { data } = await apiClient.get(`/equipment/${id}`);
+    return data.data as Equipment;
+  },
+
   /** Public: list verified equipment */
   listVerified: async (categoryId?: string): Promise<Equipment[]> => {
     const { data } = await apiClient.get("/equipment", {

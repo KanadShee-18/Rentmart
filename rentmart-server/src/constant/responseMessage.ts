@@ -5,6 +5,10 @@ export default {
   TOO_MANY_REQUEST: `Too many requests. Try again after some time.`,
   ALREADY_EXISTS: (entity: string, identifier: string) =>
     `${entity} with ${identifier} already exists.`,
-  INVALID_CREDENTIALS: 'Invalid email or password.',
-  UNAUTHORIZED: 'Unauthorized access.',
-}
+  INVALID_CREDENTIALS: "Invalid email or password.",
+  UNAUTHORIZED: "Unauthorized access.",
+  EMAIL_NOT_VERIFIED:
+    "Please verify your email before logging in. Check your inbox for the OTP.",
+  OTP_INVALID_OR_EXPIRED: "The OTP is invalid or has expired.",
+  EMAIL_ALREADY_VERIFIED: "Your email is already verified.",
+};

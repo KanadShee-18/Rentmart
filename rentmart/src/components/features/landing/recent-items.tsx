@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useVerifiedEquipment } from "@/hooks/use-equipment";
 import { MainHeading } from "@/components/common/main-heading";
 
@@ -37,7 +38,11 @@ export const RecentItems = () => {
       <MainHeading headingText='Recently Listed' />
       <div className='flex gap-4 overflow-x-auto pb-2 scrollbar-hide'>
         {recent.map((item) => (
-          <div key={item.id} className='min-w-52 lg:min-w-60 shrink-0 group'>
+          <Link
+            key={item.id}
+            href={`/category/${item.category.id}/${item.id}`}
+            className='min-w-52 lg:min-w-60 shrink-0 group'
+          >
             <div className='overflow-hidden rounded-xl border bg-muted'>
               {item.images[0] ? (
                 <Image
@@ -64,10 +69,9 @@ export const RecentItems = () => {
                 ₹{Number(item.pricePerDay).toLocaleString("en-IN")}/day
               </p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
   );
 };
-

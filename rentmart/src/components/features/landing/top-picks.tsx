@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useVerifiedEquipment } from "@/hooks/use-equipment";
 import { MainHeading } from "@/components/common/main-heading";
 
@@ -48,7 +49,11 @@ export const TopPicks = () => {
       </div>
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
         {items.map((item) => (
-          <div key={item.id} className='group cursor-pointer'>
+          <Link
+            key={item.id}
+            href={`/category/${item.category.id}/${item.id}`}
+            className='group cursor-pointer'
+          >
             <div className='overflow-hidden rounded-xl border bg-muted aspect-square relative'>
               {item.images[0] ? (
                 <Image
@@ -79,10 +84,9 @@ export const TopPicks = () => {
                 ₹{Number(item.pricePerDay).toLocaleString("en-IN")}/day
               </p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
   );
 };
-

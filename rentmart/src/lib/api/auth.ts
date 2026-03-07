@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   role: "RENTER" | "OWNER" | "ADMIN";
   isVerified: boolean;
+  emailVerified: boolean;
 }
 
 export interface SignupPayload {
@@ -25,10 +26,19 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
+export interface VerifyOtpPayload {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpPayload {
+  email: string;
+}
+
 export const authApi = {
   signup: async (payload: SignupPayload) => {
     const { data } = await apiClient.post("/auth/signup", payload);
-    return data as { data: AuthUser };
+    return data as { data: AuthUser & { message: string } };
   },
 
   login: async (payload: LoginPayload) => {
@@ -49,5 +59,15 @@ export const authApi = {
   getMe: async (): Promise<AuthUser> => {
     const { data } = await apiClient.get("/auth/me");
     return data.data as AuthUser;
+  },
+
+  verifyOtp: async (payload: VerifyOtpPayload) => {
+    const { data } = await apiClient.post("/auth/verify-otp", payload);
+    return data as { message: string };
+  },
+
+  resendOtp: async (payload: ResendOtpPayload) => {
+    const { data } = await apiClient.post("/auth/resend-otp", payload);
+    return data as { message: string };
   },
 };
