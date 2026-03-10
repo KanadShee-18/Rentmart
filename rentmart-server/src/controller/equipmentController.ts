@@ -133,7 +133,7 @@ export default {
     try {
       const { id } = req.params;
       const equipment = await prisma.equipment.findFirst({
-        where: { id, status: "VERIFIED" },
+        where: { id: id as string, status: "VERIFIED" },
         select: EQUIPMENT_SELECT,
       });
       if (!equipment)

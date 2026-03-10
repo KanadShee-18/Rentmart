@@ -118,7 +118,7 @@ export const Category = () => {
           onClick={() => scroll("left")}
           disabled={!canScrollLeft}
           aria-label='Scroll left'
-          className='shrink-0 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
+          className='shrink-0 rounded-full border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
         >
           <ChevronLeft size={16} />
         </button>
@@ -134,7 +134,7 @@ export const Category = () => {
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
-                className='flex items-center gap-2 shrink-0 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted'
+                className='flex items-center gap-2 shrink-0 rounded-md bg-background px-4 py-2 text-sm font-medium text-foreground/65 hover:text-foreground transition-colors hover:bg-muted'
               >
                 <Icon size={15} className='text-muted-foreground shrink-0' />
                 <span className='whitespace-nowrap'>{cat.name}</span>
@@ -147,7 +147,7 @@ export const Category = () => {
           onClick={() => scroll("right")}
           disabled={!canScrollRight}
           aria-label='Scroll right'
-          className='shrink-0 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
+          className='shrink-0 rounded-full border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
         >
           <ChevronRight size={16} />
         </button>
