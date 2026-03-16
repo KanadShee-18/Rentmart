@@ -5,6 +5,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  imageUrl?: string;
 }
 
 export const categoryApi = {
@@ -13,11 +14,10 @@ export const categoryApi = {
     return data.data as Category[];
   },
 
-  create: async (payload: {
-    name: string;
-    description?: string;
-  }): Promise<Category> => {
-    const { data } = await apiClient.post("/categories", payload);
+  create: async (payload: FormData): Promise<Category> => {
+    const { data } = await apiClient.post("/categories", payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data.data as Category;
   },
 

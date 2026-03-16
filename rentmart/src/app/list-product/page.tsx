@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories } from "@/hooks/use-category";
 import { useCreateEquipment, useMyListings } from "@/hooks/use-equipment";
@@ -18,6 +19,15 @@ const STATUS_STYLES: Record<string, string> = {
     "border-green-500/40 bg-green-500/10 text-green-600 dark:text-green-400",
   REJECTED: "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400",
 };
+
+function getCategorySummary(description?: string) {
+  if (!description) return "No description available.";
+
+  const match = description.match(/examples?:\s*(.*)$/i);
+  const trimmedSummary = match?.[1]?.trim();
+
+  return trimmedSummary || "No description available.";
+}
 
 export default function ListProductPage() {
   const router = useRouter();
@@ -38,15 +48,36 @@ export default function ListProductPage() {
   const [pricePerDay, setPricePerDay] = useState("");
   const [location, setLocation] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const categoryMenuRef = useRef<HTMLDivElement>(null);
+  const selectedCategory = categories.find(
+    (category) => category.id === categoryId,
+  );
 
   // Access guard
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
     if (!isLoading && isAuthenticated && !isOwner) router.replace("/");
   }, [isLoading, isAuthenticated, isOwner, router]);
+
+  useEffect(() => {
+    if (!isCategoryMenuOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (
+        categoryMenuRef.current &&
+        !categoryMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [isCategoryMenuOpen]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -86,6 +117,7 @@ export default function ListProductPage() {
           setPricePerDay("");
           setLocation("");
           setCategoryId("");
+          setIsCategoryMenuOpen(false);
           setImages([]);
           setPreviews([]);
           if (fileInputRef.current) fileInputRef.current.value = "";
@@ -138,23 +170,110 @@ export default function ListProductPage() {
 
             {/* Category */}
             <div className='space-y-1.5'>
-              <Label htmlFor='eq-category'>Category</Label>
-              <select
-                id='eq-category'
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                required
-                className='w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring'
-              >
-                <option value='' disabled>
-                  {categoriesLoading ? "Loading…" : "Select a category"}
-                </option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <Label htmlFor='eq-category-trigger'>Category</Label>
+              <div className='relative' ref={categoryMenuRef}>
+                <button
+                  id='eq-category-trigger'
+                  type='button'
+                  aria-haspopup='listbox'
+                  aria-expanded={isCategoryMenuOpen}
+                  aria-required='true'
+                  onClick={() =>
+                    !categoriesLoading &&
+                    categories.length > 0 &&
+                    setIsCategoryMenuOpen((open) => !open)
+                  }
+                  className='flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left ring-offset-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60'
+                  disabled={categoriesLoading || categories.length === 0}
+                >
+                  {selectedCategory ? (
+                    <div className='grid min-w-0 flex-1 grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-3'>
+                      <div className='relative h-12 w-12 overflow-hidden rounded-md border bg-muted'>
+                        {selectedCategory.imageUrl ? (
+                          <Image
+                            src={selectedCategory.imageUrl}
+                            alt={selectedCategory.name}
+                            fill
+                            className='object-cover'
+                          />
+                        ) : (
+                          <div className='flex h-full w-full items-center justify-center text-[10px] text-muted-foreground'>
+                            No image
+                          </div>
+                        )}
+                      </div>
+                      <div className='min-w-0'>
+                        <p className='truncate text-sm font-medium text-foreground'>
+                          {selectedCategory.name}
+                        </p>
+                        <p className='line-clamp-2 text-xs text-muted-foreground'>
+                          {getCategorySummary(selectedCategory.description)}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className='text-sm text-muted-foreground'>
+                      {categoriesLoading
+                        ? "Loading categories…"
+                        : categories.length === 0
+                          ? "No categories available"
+                          : "Select a category"}
+                    </span>
+                  )}
+                  <ChevronDown
+                    className={`ml-3 size-4 shrink-0 text-muted-foreground transition-transform ${isCategoryMenuOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isCategoryMenuOpen && categories.length > 0 && (
+                  <div
+                    role='listbox'
+                    aria-label='Category options'
+                    className='absolute z-20 mt-2 max-h-80 w-full overflow-y-auto rounded-xl border bg-popover p-2 shadow-lg'
+                  >
+                    {categories.map((category) => {
+                      const isSelected = category.id === categoryId;
+
+                      return (
+                        <button
+                          key={category.id}
+                          type='button'
+                          role='option'
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            setCategoryId(category.id);
+                            setIsCategoryMenuOpen(false);
+                          }}
+                          className={`grid w-full grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${isSelected ? "bg-muted" : "hover:bg-muted/70"}`}
+                        >
+                          <div className='relative h-12 w-12 overflow-hidden rounded-md border bg-muted'>
+                            {category.imageUrl ? (
+                              <Image
+                                src={category.imageUrl}
+                                alt={category.name}
+                                fill
+                                className='object-cover'
+                              />
+                            ) : (
+                              <div className='flex h-full w-full items-center justify-center text-[10px] text-muted-foreground'>
+                                No image
+                              </div>
+                            )}
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='truncate text-sm font-medium text-foreground'>
+                              {category.name}
+                            </p>
+                            <p className='line-clamp-2 text-xs text-muted-foreground'>
+                              {getCategorySummary(category.description)}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Price */}

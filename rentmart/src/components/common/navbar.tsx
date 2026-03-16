@@ -4,32 +4,50 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./theme-toggler";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth, useLogout } from "@/hooks/use-auth";
 
 export const Navbar = () => {
   const { user, isLoading, isAuthenticated, isOwner, isAdmin } = useAuth();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isAdminPage = pathname.startsWith("/admin");
 
   return (
-    <div className='fixed top-0 dark:border-b inset-x-0 shadow-lg backdrop-blur-md z-999'>
-      <div className='max-w-7xl mx-auto h-14 px-5 md:px-10 flex items-center justify-between'>
+    <div
+      className={`fixed block inset-x-0 top-0 z-999 border-b border-neutral-200/70 backdrop-blur-md ${
+        isHomePage
+          ? "bg-white/92 shadow-none"
+          : "bg-background/88 shadow-lg dark:border-white/10"
+      } ${isAdminPage ? "hidden" : "block"} `}
+    >
+      <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-10'>
         <Link href='/' className='flex items-center gap-x-1.5'>
-          <span>
-            <Image
-              src={"/core/rentmart-logo.png"}
-              alt='RentMart'
-              width={50}
-              height={50}
-              unoptimized
-              className='invert dark:invert-0'
-            />
-          </span>
-          <p className='text-xl font-jura font-extrabold text-neutral-700 dark:text-neutral-200 tracking-tighter'>
-            Rentmart
+          {!isHomePage && (
+            <span>
+              <Image
+                src={"/core/rentmart-logo.png"}
+                alt='RentMart'
+                width={50}
+                height={50}
+                unoptimized
+                className='invert dark:invert-0'
+              />
+            </span>
+          )}
+          <p
+            className={`font-jura text-xl font-extrabold tracking-tighter ${
+              isHomePage
+                ? "text-neutral-900"
+                : "text-neutral-700 dark:text-neutral-200"
+            }`}
+          >
+            RENTMART
           </p>
         </Link>
         <div className='flex items-center gap-x-2.5'>
-          <ModeToggle />
+          {!isHomePage && <ModeToggle />}
           {!isLoading && (
             <>
               {isAuthenticated ? (
@@ -65,16 +83,30 @@ export const Navbar = () => {
                     variant={"outline"}
                     disabled={isLoggingOut}
                     onClick={() => logout()}
+                    className={isHomePage ? "rounded-2xl" : undefined}
                   >
                     {isLoggingOut ? "Logging out…" : "Log Out"}
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button className={"shadow-lg"} variant={"outline"}>
-                    <Link href='/login'>Log In</Link>
+                  <Button
+                    className={
+                      isHomePage
+                        ? "rounded-2xl border-transparent bg-transparent px-3 text-neutral-900 shadow-none hover:bg-neutral-100"
+                        : "shadow-lg"
+                    }
+                    variant={isHomePage ? "ghost" : "outline"}
+                  >
+                    <Link href='/login'>Login</Link>
                   </Button>
-                  <Button>
+                  <Button
+                    className={
+                      isHomePage
+                        ? "rounded-2xl bg-neutral-900 px-4 text-white hover:bg-neutral-800"
+                        : undefined
+                    }
+                  >
                     <Link href='/signup'>Sign Up</Link>
                   </Button>
                 </>

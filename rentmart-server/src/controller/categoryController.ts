@@ -1,9 +1,16 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 import responseMessage from "../constant/responseMessage.js";
 import { prisma } from "../lib/db.js";
 import { createCategorySchema } from "../schema/category.schema.js";
+import {
+  deleteFromCloudinary,
+  upload,
+  uploadToCloudinary,
+} from "../util/fileUpload.js";
 import { httpError } from "../util/httpError.js";
 import { httpResponse } from "../util/httpResponse.js";
+
+export const uploadCategoryImage: RequestHandler = upload.single("image");
 
 function slugify(name: string): string {
   return name
@@ -19,7 +26,13 @@ export default {
     try {
       const categories = await prisma.category.findMany({
         orderBy: { name: "asc" },
-        select: { id: true, name: true, slug: true, description: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          imageUrl: true,
+        },
       });
       httpResponse(req, res, 200, responseMessage.SUCCESS, categories);
     } catch (error) {
@@ -37,6 +50,17 @@ export default {
           .join(", ");
         return httpError(next, new Error(msg), req, 422);
       }
+
+      const file = req.file as Express.Multer.File | undefined;
+      if (!file) {
+        return httpError(
+          next,
+          new Error("Category image is required."),
+          req,
+          422,
+        );
+      }
+
       const { name, description } = result.data;
       const slug = slugify(name);
 
@@ -52,8 +76,16 @@ export default {
         );
       }
 
+      const uploaded = await uploadToCloudinary(file);
+
       const category = await prisma.category.create({
-        data: { name, slug, description: description ?? null },
+        data: {
+          name,
+          slug,
+          description: description ?? null,
+          imageUrl: uploaded.secure_url,
+          imagePublicId: uploaded.public_id,
+        },
       });
       httpResponse(req, res, 201, responseMessage.SUCCESS, category);
     } catch (error) {
@@ -73,6 +105,9 @@ export default {
           req,
           404,
         );
+      }
+      if (category.imagePublicId) {
+        await deleteFromCloudinary(category.imagePublicId);
       }
       await prisma.category.delete({ where: { id } });
       httpResponse(req, res, 200, responseMessage.SUCCESS, null);

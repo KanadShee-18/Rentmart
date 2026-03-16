@@ -12,8 +12,7 @@ export function useCategories() {
 export function useCreateCategory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { name: string; description?: string }) =>
-      categoryApi.create(payload),
+    mutationFn: (payload: FormData) => categoryApi.create(payload),
     onSuccess: (newCategory) => {
       qc.setQueryData<Category[]>(CATEGORIES_KEY, (prev = []) => [
         ...prev,

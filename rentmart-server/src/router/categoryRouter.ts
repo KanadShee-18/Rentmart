@@ -1,19 +1,27 @@
-import express, { type Router } from 'express'
-import categoryController from '../controller/categoryController.js'
-import { authenticate, requireRole } from '../middleware/auth.js'
+import express, { type Router } from "express";
+import categoryController, {
+  uploadCategoryImage,
+} from "../controller/categoryController.js";
+import { authenticate, requireRole } from "../middleware/auth.js";
 
-const router: Router = express.Router()
+const router: Router = express.Router();
 
 // Public
-router.get('/', categoryController.list)
+router.get("/", categoryController.list);
 
 // Admin only
-router.post('/', authenticate, requireRole('ADMIN'), categoryController.create)
-router.delete(
-  '/:id',
+router.post(
+  "/",
   authenticate,
-  requireRole('ADMIN'),
-  categoryController.remove
-)
+  requireRole("ADMIN"),
+  uploadCategoryImage,
+  categoryController.create,
+);
+router.delete(
+  "/:id",
+  authenticate,
+  requireRole("ADMIN"),
+  categoryController.remove,
+);
 
-export default router
+export default router;
