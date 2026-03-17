@@ -29,7 +29,7 @@ export const RecentItems = () => {
               key={i}
               className='rounded-[2rem] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(235,243,246,0.78))] p-3 shadow-[0_18px_40px_rgba(15,23,42,0.10)]'
             >
-              <div className='aspect-4/5 rounded-[1.65rem] bg-muted animate-pulse' />
+              <div className='aspect-square rounded-[1.65rem] bg-muted animate-pulse' />
               <div className='mt-3 h-5 w-2/3 rounded bg-muted animate-pulse' />
               <div className='mt-2 h-4 w-1/2 rounded bg-muted animate-pulse' />
             </div>
@@ -68,28 +68,26 @@ export const RecentItems = () => {
           >
             <div className='relative overflow-hidden rounded-[1.55rem] border border-white/60 bg-muted'>
               {item.images[0] ? (
-                <Image
-                  src={item.images[0]}
-                  alt={item.name}
-                  width={520}
-                  height={640}
-                  className='aspect-4/5 w-full object-cover transition-transform duration-500 group-hover:scale-105'
-                />
+                <div className='relative'>
+                  <Image
+                    src={item.images[0]}
+                    alt={item.name}
+                    width={520}
+                    height={520}
+                    className='aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105'
+                  />
+                </div>
               ) : (
-                <div className='flex aspect-4/5 w-full items-center justify-center text-xs text-muted-foreground'>
+                <div className='flex aspect-square w-full items-center justify-center text-xs text-muted-foreground'>
                   No image
                 </div>
               )}
 
-              <div className='pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/55 via-black/20 to-transparent p-4 text-white'>
-                <div className='flex items-start justify-between gap-2'>
-                  <h3 className='line-clamp-2 text-lg font-semibold tracking-[-0.02em]'>
-                    {item.name}
-                  </h3>
-                  <span className='shrink-0 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold backdrop-blur'>
-                    ₹{Number(item.pricePerDay).toLocaleString("en-IN")}
-                  </span>
-                </div>
+              <div className='pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/80 via-black/45 to-transparent' />
+              <div className='pointer-events-none absolute inset-x-0 bottom-0 p-4 text-white'>
+                <h3 className='line-clamp-2 text-lg font-semibold tracking-[-0.02em]'>
+                  {item.name}
+                </h3>
               </div>
             </div>
 
@@ -111,8 +109,13 @@ export const RecentItems = () => {
                 </span>
               </div>
 
-              <div className='rounded-full border border-slate-300/80 bg-white/90 py-2 text-center text-sm font-semibold text-slate-900 transition-colors group-hover:bg-slate-100'>
-                Book now
+              <div className='mt-3'>
+                <p className='mb-2 text-right text-xs font-semibold text-slate-900'>
+                  ₹{Number(item.pricePerDay).toLocaleString("en-IN")}/day
+                </p>
+                <div className='mt-2 rounded-full border border-slate-300/80 bg-white/90 py-2 text-center text-sm font-semibold text-slate-900 transition-colors group-hover:bg-slate-100'>
+                  Book now
+                </div>
               </div>
             </div>
           </Link>
